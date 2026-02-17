@@ -1,0 +1,2328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zoho CRM Playbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0b0f;
+    --bg2: #111318;
+    --bg3: #181b22;
+    --surface: #1e222d;
+    --surface2: #252a36;
+    --border: #2d3245;
+    --orange: #f97316;
+    --orange-dim: rgba(249,115,22,0.12);
+    --orange-glow: rgba(249,115,22,0.25);
+    --text: #e8eaf0;
+    --text-dim: #8b91a8;
+    --text-faint: #4a5068;
+    --green: #22c55e;
+    --blue: #3b82f6;
+    --purple: #a855f7;
+    --red: #ef4444;
+    --yellow: #eab308;
+    --radius: 12px;
+    --sidebar-w: 260px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    display: flex; flex-direction: column;
+    z-index: 100;
+    overflow-y: auto;
+    transition: transform .3s;
+  }
+
+  .sidebar-logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-logo .brand {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--orange);
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+
+  .sidebar-logo .sub {
+    font-size: 11px;
+    color: var(--text-faint);
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .sidebar-nav { flex: 1; padding: 16px 12px; }
+
+  .nav-group-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding: 12px 12px 6px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--text-dim);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all .2s;
+    margin-bottom: 2px;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+
+  .nav-link:hover { background: var(--surface); color: var(--text); }
+  .nav-link.active { background: var(--orange-dim); color: var(--orange); font-weight: 500; }
+
+  .nav-link .icon {
+    width: 18px; height: 18px;
+    opacity: .6;
+    flex-shrink: 0;
+  }
+
+  .nav-link.active .icon { opacity: 1; }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--surface2);
+    color: var(--text-faint);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 20px;
+  }
+
+  .sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-faint);
+    line-height: 1.6;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    min-height: 100vh;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(10,11,15,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .breadcrumb {
+    font-size: 13px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .breadcrumb span { color: var(--text); font-weight: 500; }
+
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+  .tag {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+
+  .tag-orange { border-color: var(--orange); color: var(--orange); background: var(--orange-dim); }
+  .tag-green  { border-color: var(--green); color: var(--green); background: rgba(34,197,94,.1); }
+  .tag-blue   { border-color: var(--blue); color: var(--blue); background: rgba(59,130,246,.1); }
+
+  /* ── CONTENT ── */
+  .content { padding: 48px 56px 80px; max-width: 1100px; }
+
+  .section { display: none; animation: fadeIn .4s ease; }
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--bg3) 0%, #1a1024 100%);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 56px 56px 48px;
+    margin-bottom: 40px;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(249,115,22,.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 16px;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  .hero h1 em { color: var(--orange); font-style: normal; }
+
+  .hero p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text-dim);
+    max-width: 600px;
+    margin-bottom: 32px;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .meta-item .label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .meta-item .value {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  /* ── CARDS ── */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-bottom: 32px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    transition: border-color .2s, transform .2s;
+    cursor: default;
+  }
+
+  .card:hover { border-color: var(--orange); transform: translateY(-2px); }
+
+  .card-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--orange-dim);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+    font-size: 18px;
+  }
+
+  .card h3 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .card p  { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+
+  /* ── SECTION HEADING ── */
+  .sec-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    margin-bottom: 8px;
+  }
+
+  .sec-sub {
+    font-size: 15px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 36px;
+    max-width: 640px;
+  }
+
+  .divider {
+    width: 40px;
+    height: 3px;
+    background: var(--orange);
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+
+  /* ── INFO BLOCK ── */
+  .info-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--orange);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+
+  .info-block.blue-l  { border-left-color: var(--blue); }
+  .info-block.green-l { border-left-color: var(--green); }
+  .info-block.purple-l{ border-left-color: var(--purple); }
+
+  .info-block h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .info-block p, .info-block ul {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  .info-block ul { padding-left: 18px; }
+  .info-block ul li { margin-bottom: 5px; }
+
+  /* ── TERMS GRID ── */
+  .terms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+
+  .term-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    transition: all .2s;
+  }
+
+  .term-card:hover { border-color: var(--orange); background: var(--surface2); }
+
+  .term-pill {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: var(--orange-dim);
+    color: var(--orange);
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+
+  .term-card h4 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .term-card p  { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+
+  /* ── MODULE TABS ── */
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; flex-wrap: wrap; }
+
+  .tab-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .tab-btn:hover  { border-color: var(--orange); color: var(--text); }
+  .tab-btn.active { background: var(--orange); color: #fff; border-color: var(--orange); font-weight: 600; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeIn .3s ease; }
+
+  /* ── MODULE CARD ── */
+  .module-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  @media (max-width: 700px) { .module-card { grid-template-columns: 1fr; } }
+
+  .module-header {
+    grid-column: 1/-1;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 4px;
+  }
+
+  .mod-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .mod-icon.orange { background: var(--orange-dim); }
+  .mod-icon.blue   { background: rgba(59,130,246,.12); }
+  .mod-icon.green  { background: rgba(34,197,94,.12); }
+  .mod-icon.purple { background: rgba(168,85,247,.12); }
+  .mod-icon.yellow { background: rgba(234,179,8,.12); }
+
+  .module-header h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+  .module-header p  { font-size: 13px; color: var(--text-dim); margin-top: 3px; }
+
+  .col-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 10px;
+  }
+
+  .check-list li {
+    list-style: none;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    margin-bottom: 7px;
+    line-height: 1.5;
+  }
+
+  .check-list li::before {
+    content: '✓';
+    color: var(--orange);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── DAILY WORKFLOW ── */
+  .workflow-periods { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 32px; }
+
+  @media (max-width: 700px) { .workflow-periods { grid-template-columns: 1fr; } }
+
+  .period-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .period-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .period-card.morning::before { background: var(--yellow); }
+  .period-card.day::before     { background: var(--orange); }
+  .period-card.evening::before { background: var(--blue); }
+
+  .period-time {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .period-card.morning .period-time { color: var(--yellow); }
+  .period-card.day     .period-time { color: var(--orange); }
+  .period-card.evening .period-time { color: var(--blue); }
+
+  .period-card h4 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+
+  .step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .step-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--orange);
+    flex-shrink: 0;
+    margin-top: 7px;
+  }
+
+  .step-item p { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+
+  /* ── RULES ── */
+  .rules-list { counter-reset: rules; margin-bottom: 32px; }
+
+  .rule-item {
+    counter-increment: rules;
+    display: flex;
+    gap: 16px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+
+  .rule-item:last-child { border-bottom: none; }
+
+  .rule-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--border);
+    flex-shrink: 0;
+    width: 44px;
+    line-height: 1;
+    text-align: right;
+  }
+
+  .rule-content h4 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 5px; }
+  .rule-content p  { font-size: 13.5px; color: var(--text-dim); line-height: 1.6; }
+
+  /* ── GOLDEN RULES ── */
+  .golden-rules {
+    background: linear-gradient(135deg, #1a100a 0%, #1a120d 100%);
+    border: 1px solid var(--orange);
+    border-radius: 16px;
+    padding: 32px 36px;
+    margin-top: 32px;
+  }
+
+  .golden-rules h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--orange);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .golden-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(249,115,22,.15);
+  }
+
+  .golden-item:last-child { border-bottom: none; }
+  .golden-star { font-size: 18px; }
+  .golden-item p { font-size: 14px; font-weight: 500; color: var(--text); }
+
+  /* ── FUNNEL ── */
+  .funnel-wrap {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 32px;
+    margin-bottom: 40px;
+  }
+
+  @media (max-width: 900px) { .funnel-wrap { grid-template-columns: 1fr; } }
+
+  .funnel-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    align-items: center;
+    padding: 20px 0;
+  }
+
+  .funnel-stage {
+    position: relative;
+    cursor: pointer;
+    transition: all .25s;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .funnel-stage:hover .fs-inner { filter: brightness(1.15); }
+  .funnel-stage.selected .fs-inner { box-shadow: 0 0 0 2px var(--orange), 0 8px 24px var(--orange-glow); }
+
+  .fs-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin: 4px 0;
+    transition: all .25s;
+    width: 100%;
+  }
+
+  .fs-label { display: flex; align-items: center; gap: 12px; }
+  .fs-num {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(0,0,0,.3);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .fs-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
+  .fs-sub  { font-size: 11px; opacity: .75; margin-top: 1px; }
+  .fs-arrow { font-size: 18px; opacity: .6; }
+
+  .stage-s1 .fs-inner { background: linear-gradient(135deg, #1e3a5f, #1e3a5f); }
+  .stage-s2 .fs-inner { background: linear-gradient(135deg, #1a3a2e, #1a3a2e); }
+  .stage-s3 .fs-inner { background: linear-gradient(135deg, #3d2614, #3d2614); }
+  .stage-s4 .fs-inner { background: linear-gradient(135deg, #2d1a3d, #2d1a3d); }
+  .stage-s5 .fs-inner { background: linear-gradient(135deg, #3d1a1a, #3d1a1a); }
+  .stage-fin .fs-inner { background: linear-gradient(135deg, #1a3a1a, #1a3a1a); }
+
+  .funnel-connector {
+    width: 2px;
+    height: 12px;
+    background: var(--border);
+    margin: 0 auto;
+  }
+
+  .stage-detail {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    position: sticky;
+    top: 80px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    animation: fadeIn .3s ease;
+  }
+
+  .stage-detail h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .stage-detail .owner-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--orange-dim);
+    color: var(--orange);
+    margin-bottom: 16px;
+  }
+
+  .stage-detail p {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+
+  .detail-section h5 {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 10px;
+  }
+
+  .action-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 7px;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .action-item::before { content: '→'; color: var(--orange); flex-shrink: 0; }
+
+  .trigger-item {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .trigger-item strong { color: var(--text); font-weight: 600; display: block; margin-bottom: 3px; }
+
+  .exit-box {
+    background: rgba(34,197,94,.07);
+    border: 1px solid rgba(34,197,94,.2);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 12px;
+  }
+
+  .exit-box strong { color: var(--green); }
+
+  /* ── SCENARIO ── */
+  .scenario-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 28px;
+  }
+
+  .scenario-header h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 14px; }
+
+  .scenario-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .s-meta-item .s-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 4px;
+  }
+
+  .s-meta-item .s-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .timeline { position: relative; padding-left: 32px; }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 9px;
+    top: 12px;
+    bottom: 12px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--orange), var(--purple), var(--green));
+  }
+
+  .tl-item {
+    position: relative;
+    margin-bottom: 8px;
+  }
+
+  .tl-dot {
+    position: absolute;
+    left: -32px;
+    top: 18px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    z-index: 1;
+    transition: transform .2s;
+  }
+
+  .tl-item:hover .tl-dot { transform: scale(1.2); }
+
+  .tl-body {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+
+  .tl-item:hover .tl-body { border-color: var(--text-faint); }
+
+  .tl-header {
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .tl-stage-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .tl-header h4 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; flex: 1; }
+
+  .tl-chevron {
+    font-size: 12px;
+    color: var(--text-faint);
+    transition: transform .2s;
+    flex-shrink: 0;
+  }
+
+  .tl-item.open .tl-chevron { transform: rotate(180deg); }
+
+  .tl-content {
+    display: none;
+    padding: 0 20px 20px;
+  }
+
+  .tl-item.open .tl-content { display: block; animation: fadeIn .25s ease; }
+
+  .tl-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 700px) { .tl-cols { grid-template-columns: 1fr; } }
+
+  .tl-col-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .tl-col-label.manual { color: var(--blue); }
+  .tl-col-label.auto   { color: var(--purple); }
+
+  .actor-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 3px 9px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+
+  .auto-item {
+    background: rgba(168,85,247,.07);
+    border: 1px solid rgba(168,85,247,.15);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+
+  .auto-item strong { color: var(--purple); }
+
+  .result-box {
+    background: rgba(34,197,94,.06);
+    border: 1px solid rgba(34,197,94,.18);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .result-box strong { color: var(--green); font-weight: 600; }
+
+  /* ── RESPONSIBILITY MATRIX ── */
+  .resp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-bottom: 32px; }
+
+  .resp-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+
+  .resp-card .who {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .resp-card .who .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* ── STATUS LEGEND ── */
+  .status-list { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
+
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: default;
+  }
+
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── LEAD STEPS ── */
+  .steps-visual { display: flex; gap: 0; margin-bottom: 32px; overflow-x: auto; padding-bottom: 8px; }
+
+  .step-block {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .step-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    width: 140px;
+    transition: all .2s;
+  }
+
+  .step-box:hover { border-color: var(--orange); background: var(--surface2); }
+
+  .step-box .sn {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .step-box p { font-size: 12px; color: var(--text-dim); line-height: 1.4; }
+
+  .step-arrow {
+    width: 32px;
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  /* ── ACCORDION ── */
+  .accordion { margin-bottom: 32px; }
+
+  .acc-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+
+  .acc-item:hover { border-color: var(--text-faint); }
+  .acc-item.open  { border-color: var(--orange); }
+
+  .acc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    cursor: pointer;
+    gap: 12px;
+  }
+
+  .acc-header h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    flex: 1;
+  }
+
+  .acc-icon {
+    font-size: 16px;
+    color: var(--text-faint);
+    transition: transform .2s;
+    flex-shrink: 0;
+  }
+
+  .acc-item.open .acc-icon { transform: rotate(45deg); color: var(--orange); }
+
+  .acc-body {
+    display: none;
+    padding: 0 20px 20px;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  .acc-item.open .acc-body { display: block; animation: fadeIn .25s ease; }
+
+  /* ── MISTAKES ── */
+  .mistakes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  @media (max-width: 700px) { .mistakes-grid { grid-template-columns: 1fr; } }
+
+  .mistake-card {
+    background: var(--surface);
+    border: 1px solid rgba(239,68,68,.2);
+    border-radius: var(--radius);
+    padding: 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .mistake-x {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: rgba(239,68,68,.1);
+    color: var(--red);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .mistake-card p { font-size: 13.5px; color: var(--text-dim); line-height: 1.5; }
+  .mistake-card strong { color: var(--text); font-weight: 600; display: block; margin-bottom: 3px; }
+
+  /* ── PROGRESS BAR ── */
+  .progress-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .prog-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .prog-row:last-child { margin-bottom: 0; }
+  .prog-label { font-size: 13px; color: var(--text-dim); width: 140px; flex-shrink: 0; }
+
+  .prog-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .prog-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--orange);
+    transition: width 1s ease;
+  }
+
+  .prog-val { font-size: 13px; font-weight: 600; color: var(--text); width: 40px; text-align: right; flex-shrink: 0; }
+
+  /* ── MOBILE NAV TOGGLE ── */
+  .mob-nav-toggle {
+    display: none;
+    position: fixed;
+    bottom: 24px; right: 24px;
+    z-index: 200;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--orange);
+    color: #fff;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px var(--orange-glow);
+  }
+
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; }
+    .mob-nav-toggle { display: flex; align-items: center; justify-content: center; }
+    .content { padding: 28px 20px 60px; }
+    .hero { padding: 32px 24px 28px; }
+    .hero h1 { font-size: 36px; }
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+
+  /* ── OVERLAY ── */
+  .overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.6);
+    z-index: 99;
+  }
+
+  .overlay.open { display: block; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">ZOHO CRM</div>
+    <div class="sub">Interactive Playbook</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Overview</div>
+    <button class="nav-link active" onclick="showSection('home')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </button>
+    <button class="nav-link" onclick="showSection('intro')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Introduction
+    </button>
+    <div class="nav-group-label">Core CRM</div>
+    <button class="nav-link" onclick="showSection('terms')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Key Terms
+    </button>
+    <button class="nav-link" onclick="showSection('modules')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="6" height="6"/><rect x="9" y="3" width="6" height="6"/><rect x="16" y="3" width="6" height="6"/><rect x="2" y="10" width="6" height="11"/><rect x="9" y="10" width="13" height="11"/></svg>
+      CRM Modules
+    </button>
+    <button class="nav-link" onclick="showSection('workflow')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41"/><path d="M4.93 4.93l1.41 1.41"/><path d="M22 12h-2M4 12H2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 22v-2M12 4V2"/></svg>
+      Daily Workflow
+    </button>
+    <button class="nav-link" onclick="showSection('leadguide')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      Lead Guide
+    </button>
+    <button class="nav-link" onclick="showSection('rules')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Best Practices
+    </button>
+    <div class="nav-group-label">GTM Strategy</div>
+    <button class="nav-link" onclick="showSection('funnel')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      GTM Funnel
+      <span class="nav-badge">6</span>
+    </button>
+    <button class="nav-link" onclick="showSection('scenario')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      Scenario: Marico
+    </button>
+    <button class="nav-link" onclick="showSection('responsibility')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Responsibilities
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    Prepared by: Aswatha Sowji S<br>
+    Reviewed by: Dr. Karthick Ramesh<br>
+    Group CGO & CEO – Middle East, Tabhi Inc.
+  </div>
+</aside>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<button class="mob-nav-toggle" onclick="toggleSidebar()">☰</button>
+
+<!-- Main -->
+<main class="main">
+  <div class="topbar">
+    <div class="breadcrumb">Playbook <span>›</span> <span id="bread-label">Home</span></div>
+    <div class="topbar-right">
+      <span class="tag tag-orange">CRM Playbook</span>
+      <span class="tag tag-green">Live</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── HOME ── -->
+    <div class="section active" id="sec-home">
+      <div class="hero">
+        <div class="hero-eyebrow">Official User Playbook</div>
+        <h1>Zoho <em>CRM</em><br>Playbook</h1>
+        <p>A standardized, practical reference for all users across the organization. Covers lead management, module workflows, GTM onboarding funnel, and real-world scenario walkthroughs.</p>
+        <div class="hero-meta">
+          <div class="meta-item">
+            <div class="label">Prepared by</div>
+            <div class="value">Aswatha Sowji S, Market Research Team, Mondee Inc</div>
+          </div>
+          <div class="meta-item">
+            <div class="label">Reviewed by</div>
+            <div class="value">Dr. Karthick Ramesh, Group CGO & CEO – Middle East, Tabhi Inc.</div>
+          </div>
+          <div class="meta-item">
+            <div class="label">Organizations</div>
+            <div class="value">Miraee · Logixcube · Tabhi · Mondee · Aarna · Pranik</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card" onclick="showSection('terms')" style="cursor:pointer">
+          <div class="card-icon">📚</div>
+          <h3>Key Terminologies</h3>
+          <p>Learn the essential CRM vocabulary: Leads, Contacts, Accounts, Deals, Activities & Pipeline.</p>
+        </div>
+        <div class="card" onclick="showSection('modules')" style="cursor:pointer">
+          <div class="card-icon">🗂️</div>
+          <h3>CRM Modules</h3>
+          <p>Understand each module's purpose and what actions users can perform within it.</p>
+        </div>
+        <div class="card" onclick="showSection('workflow')" style="cursor:pointer">
+          <div class="card-icon">🔄</div>
+          <h3>Daily Workflow</h3>
+          <p>Morning, daytime & end-of-day routines to keep your CRM data accurate and up-to-date.</p>
+        </div>
+        <div class="card" onclick="showSection('leadguide')" style="cursor:pointer">
+          <div class="card-icon">🎯</div>
+          <h3>Lead Management</h3>
+          <p>Step-by-step instructions for creating, managing, and converting leads in Zoho CRM.</p>
+        </div>
+        <div class="card" onclick="showSection('funnel')" style="cursor:pointer">
+          <div class="card-icon">🔽</div>
+          <h3>GTM Funnel</h3>
+          <p>Interactive pipeline from Lead Identified all the way to Closed Won / Closed Lost.</p>
+        </div>
+        <div class="card" onclick="showSection('scenario')" style="cursor:pointer">
+          <div class="card-icon">📋</div>
+          <h3>Marico Scenario</h3>
+          <p>Real-world walkthrough of how an opportunity moves through every stage of the CRM pipeline.</p>
+        </div>
+      </div>
+
+      <div class="golden-rules">
+        <h3>⭐ Golden Rules</h3>
+        <div class="golden-item">
+          <span class="golden-star">🏆</span>
+          <p>If it's not in CRM — it didn't happen.</p>
+        </div>
+        <div class="golden-item">
+          <span class="golden-star">⚡</span>
+          <p>Update immediately — never batch your CRM entries.</p>
+        </div>
+        <div class="golden-item">
+          <span class="golden-star">🎯</span>
+          <p>Be accurate — data quality is everyone's responsibility.</p>
+        </div>
+        <div class="golden-item">
+          <span class="golden-star">🔁</span>
+          <p>Be consistent — same format, same standards, every time.</p>
+        </div>
+        <div class="golden-item">
+          <span class="golden-star">🔒</span>
+          <p>CRM data is confidential — don't export without permission.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── INTRO ── -->
+    <div class="section" id="sec-intro">
+      <div class="divider"></div>
+      <div class="sec-title">Introduction to Zoho CRM</div>
+      <div class="sec-sub">Zoho CRM is the central platform for tracking all business development activities across multiple verticals and geographies.</div>
+
+      <div class="info-block" style="margin-bottom:28px">
+        <h4>What is Zoho CRM?</h4>
+        <p>Zoho CRM is a centralized platform used to manage leads, customers, deals, activities, and communication across multiple business verticals. It acts as the single source of truth for all business development activities within the organization.</p>
+      </div>
+
+      <div class="sec-title" style="font-size:22px;margin-bottom:16px">Why We Use It</div>
+      <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">
+        <div class="card"><div class="card-icon">🔍</div><h3>Track Leads</h3><p>Track leads from multiple sources across all business divisions.</p></div>
+        <div class="card"><div class="card-icon">👥</div><h3>Assign Teams</h3><p>Assign leads to the right teams and ensure clear ownership.</p></div>
+        <div class="card"><div class="card-icon">🏢</div><h3>Multi-Division</h3><p>Manage multiple business divisions: Mondee, Miraee, Aarna, Pranik.</p></div>
+        <div class="card"><div class="card-icon">📈</div><h3>Monitor Sales</h3><p>Monitor sales progress and track pipeline movement in real-time.</p></div>
+        <div class="card"><div class="card-icon">🚫</div><h3>Avoid Data Loss</h3><p>Prevent data loss, duplication, and operational confusion.</p></div>
+      </div>
+
+      <div class="sec-title" style="font-size:22px;margin-bottom:16px;margin-top:8px">First Day Setup</div>
+      <div class="steps-visual">
+        <div class="step-block">
+          <div class="step-box"><div class="sn">01</div><p>Login to Zoho CRM using your credentials</p></div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-block">
+          <div class="step-box"><div class="sn">02</div><p>Update profile: Name, Role, Department</p></div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-block">
+          <div class="step-box"><div class="sn">03</div><p>Check leads assigned to you</p></div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-block">
+          <div class="step-box"><div class="sn">04</div><p>Understand your module access & permissions</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TERMS ── -->
+    <div class="section" id="sec-terms">
+      <div class="divider"></div>
+      <div class="sec-title">Key Terminologies</div>
+      <div class="sec-sub">Must-know vocabulary for every Zoho CRM user. These terms are used throughout the system and this playbook.</div>
+
+      <div class="terms-grid">
+        <div class="term-card">
+          <div class="term-pill">Term 01</div>
+          <h4>Lead</h4>
+          <p>A potential customer — someone who showed interest but is not yet a confirmed client. The starting point of your sales funnel.</p>
+        </div>
+        <div class="term-card">
+          <div class="term-pill">Term 02</div>
+          <h4>Contact</h4>
+          <p>A qualified lead — a person you are actively doing business with. Created when a lead is converted.</p>
+        </div>
+        <div class="term-card">
+          <div class="term-pill">Term 03</div>
+          <h4>Account</h4>
+          <p>The company or organization that a contact belongs to. Multiple contacts can link to one account.</p>
+        </div>
+        <div class="term-card">
+          <div class="term-pill">Term 04</div>
+          <h4>Deal</h4>
+          <p>A sales opportunity currently in progress. Tracks stages, estimated value, and closing probability.</p>
+        </div>
+        <div class="term-card">
+          <div class="term-pill">Term 05</div>
+          <h4>Activity</h4>
+          <p>Tasks, calls, meetings, and follow-ups. Every interaction logged keeps your CRM timeline accurate.</p>
+        </div>
+        <div class="term-card">
+          <div class="term-pill">Term 06</div>
+          <h4>Pipeline</h4>
+          <p>The structured sequence of stages a deal progresses through — from identification to final closure.</p>
+        </div>
+      </div>
+
+      <div class="sec-title" style="font-size:22px;margin-bottom:16px">Lead Status Values</div>
+      <div class="status-list">
+        <div class="status-badge"><span class="status-dot" style="background:#3b82f6"></span>New</div>
+        <div class="status-badge"><span class="status-dot" style="background:#eab308"></span>Contacted</div>
+        <div class="status-badge"><span class="status-dot" style="background:#f97316"></span>Interested</div>
+        <div class="status-badge"><span class="status-dot" style="background:#ef4444"></span>Not Interested</div>
+        <div class="status-badge"><span class="status-dot" style="background:#a855f7"></span>Follow-up</div>
+        <div class="status-badge"><span class="status-dot" style="background:#22c55e"></span>Converted</div>
+      </div>
+
+      <div class="sec-title" style="font-size:22px;margin-bottom:16px">Business Verticals</div>
+      <div class="info-block blue-l">
+        <h4>Multi-Business Vertical Tracking</h4>
+        <p>Our organization has multiple verticals. Users must select the correct business category, mention interest clearly, and assign to the correct team to avoid confusion.</p>
+        <ul style="margin-top:10px">
+          <li><strong>Mondee</strong> — Travel & Tech platform</li>
+          <li><strong>Miraee</strong> — Digital solutions</li>
+          <li><strong>Aarna</strong> — Services division</li>
+          <li><strong>Pranik</strong> — Innovation vertical</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ── MODULES ── -->
+    <div class="section" id="sec-modules">
+      <div class="divider"></div>
+      <div class="sec-title">CRM Modules Explained</div>
+      <div class="sec-sub">Each module serves a specific purpose in the sales lifecycle. Click a module to explore its usage and permitted actions.</div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('mod','leads',this)">Leads</button>
+        <button class="tab-btn" onclick="showTab('mod','contacts',this)">Contacts</button>
+        <button class="tab-btn" onclick="showTab('mod','accounts',this)">Accounts</button>
+        <button class="tab-btn" onclick="showTab('mod','deals',this)">Deals</button>
+        <button class="tab-btn" onclick="showTab('mod','activities',this)">Activities</button>
+      </div>
+
+      <div id="mod-leads" class="tab-panel active">
+        <div class="module-card">
+          <div class="module-header">
+            <div class="mod-icon orange">🎯</div>
+            <div><h3>Leads Module</h3><p>The entry point for all potential customers into the CRM system</p></div>
+          </div>
+          <div>
+            <div class="col-label">Used For</div>
+            <ul class="check-list">
+              <li>Adding new potential customers from any source</li>
+              <li>Tracking the source of each inquiry</li>
+              <li>Assigning leads to specific team members</li>
+            </ul>
+          </div>
+          <div>
+            <div class="col-label">Users Can</div>
+            <ul class="check-list">
+              <li>Add leads manually through the create form</li>
+              <li>Import leads in bulk via CSV/spreadsheet</li>
+              <li>Edit and update existing lead information</li>
+              <li>Convert lead → Contact + Account + Deal</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div id="mod-contacts" class="tab-panel">
+        <div class="module-card">
+          <div class="module-header">
+            <div class="mod-icon blue">👤</div>
+            <div><h3>Contacts Module</h3><p>Confirmed prospects you are actively engaging with</p></div>
+          </div>
+          <div>
+            <div class="col-label">Used For</div>
+            <ul class="check-list">
+              <li>Managing confirmed prospects after lead conversion</li>
+              <li>Maintaining full communication history with individuals</li>
+              <li>Linking contacts to their parent account</li>
+            </ul>
+          </div>
+          <div>
+            <div class="col-label">Best Practices</div>
+            <ul class="check-list">
+              <li>Always link a contact to the correct Account</li>
+              <li>Keep email and phone details current</li>
+              <li>Log every call and email interaction</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div id="mod-accounts" class="tab-panel">
+        <div class="module-card">
+          <div class="module-header">
+            <div class="mod-icon green">🏢</div>
+            <div><h3>Accounts Module</h3><p>Company and organization-level tracking</p></div>
+          </div>
+          <div>
+            <div class="col-label">Used For</div>
+            <ul class="check-list">
+              <li>Tracking company-level details and profile</li>
+              <li>Linking multiple contacts to one organization</li>
+              <li>Associating deals and activities at the account level</li>
+            </ul>
+          </div>
+          <div>
+            <div class="col-label">Key Notes</div>
+            <ul class="check-list">
+              <li>One account can have multiple contacts</li>
+              <li>Avoid creating duplicate company accounts</li>
+              <li>Include industry, size, and location data</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div id="mod-deals" class="tab-panel">
+        <div class="module-card">
+          <div class="module-header">
+            <div class="mod-icon purple">💼</div>
+            <div><h3>Deals Module</h3><p>The heart of the sales pipeline — track every opportunity</p></div>
+          </div>
+          <div>
+            <div class="col-label">Used For</div>
+            <ul class="check-list">
+              <li>Tracking ongoing business opportunities</li>
+              <li>Monitoring current stage in the pipeline</li>
+              <li>Estimating deal value and expected close date</li>
+            </ul>
+          </div>
+          <div>
+            <div class="col-label">Critical Fields</div>
+            <ul class="check-list">
+              <li>Amount — always keep updated to latest estimate</li>
+              <li>Stage — move forward as milestones are met</li>
+              <li>Closing Date — set and update as needed</li>
+              <li>Deal Owner — single point of accountability</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div id="mod-activities" class="tab-panel">
+        <div class="module-card">
+          <div class="module-header">
+            <div class="mod-icon yellow">📅</div>
+            <div><h3>Activities Module</h3><p>Log every interaction to maintain a complete timeline</p></div>
+          </div>
+          <div>
+            <div class="col-label">Used For</div>
+            <ul class="check-list">
+              <li>Setting task reminders and deadlines</li>
+              <li>Scheduling and logging follow-up calls</li>
+              <li>Recording meetings with prospects</li>
+            </ul>
+          </div>
+          <div>
+            <div class="col-label">Types of Activities</div>
+            <ul class="check-list">
+              <li>Tasks — to-dos with due dates</li>
+              <li>Calls — log outbound and inbound calls</li>
+              <li>Meetings — schedule and record outcomes</li>
+              <li>Notes — free-text summaries of interactions</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DAILY WORKFLOW ── -->
+    <div class="section" id="sec-workflow">
+      <div class="divider"></div>
+      <div class="sec-title">Daily Workflow</div>
+      <div class="sec-sub">This structure keeps your CRM data current, your pipeline moving, and your follow-ups timely. Adopt this rhythm every working day.</div>
+
+      <div class="workflow-periods">
+        <div class="period-card morning">
+          <div class="period-time">🌅 Morning Routine</div>
+          <h4>Start Fresh</h4>
+          <div class="step-item"><div class="step-dot"></div><p>Check new leads assigned to you overnight</p></div>
+          <div class="step-item"><div class="step-dot"></div><p>Review all follow-ups scheduled for today</p></div>
+          <div class="step-item"><div class="step-dot"></div><p>Update status of yesterday's pending tasks</p></div>
+          <div class="step-item"><div class="step-dot"></div><p>Prioritize your outreach list for the day</p></div>
+        </div>
+        <div class="period-card day">
+          <div class="period-time">☀️ During the Day</div>
+          <h4>Active Execution</h4>
+          <div class="step-item"><div class="step-dot"></div><p>Add new leads immediately — never batch later</p></div>
+          <div class="step-item"><div class="step-dot"></div><p>Log every call with notes right after the call</p></div>
+          <div class="step-item"><div class="step-dot"></div><p>Update deal stage when a milestone is reached</p></div>
+          <div class="step-item"><div class="step-dot"></div><p>Respond to automated CRM task reminders</p></div>
+        </div>
+        <div class="period-card evening">
+          <div class="period-time">🌙 End of Day</div>
+          <h4>Wrap Up Clean</h4>
+          <div class="step-item"><div class="step-dot"></div><p>Update notes on all deals touched today</p></div>
+          <div class="step-item"><div class="step-dot"></div><p>Schedule follow-up activities for tomorrow</p></div>
+          <div class="step-item"><div class="step-dot"></div><p>Close out all completed tasks for the day</p></div>
+          <div class="step-item"><div class="step-dot"></div><p>Verify no lead is left without a next action</p></div>
+        </div>
+      </div>
+
+      <div class="sec-title" style="font-size:22px;margin-bottom:16px">Reporting & Tracking</div>
+      <div class="progress-section">
+        <div class="col-label" style="margin-bottom:18px">What CRM Helps You Track</div>
+        <div class="prog-row">
+          <div class="prog-label">Lead Conversion</div>
+          <div class="prog-bar"><div class="prog-fill" style="width:68%"></div></div>
+          <div class="prog-val">68%</div>
+        </div>
+        <div class="prog-row">
+          <div class="prog-label">Team Performance</div>
+          <div class="prog-bar"><div class="prog-fill" style="width:82%;background:var(--green)"></div></div>
+          <div class="prog-val">82%</div>
+        </div>
+        <div class="prog-row">
+          <div class="prog-label">Follow-up Efficiency</div>
+          <div class="prog-bar"><div class="prog-fill" style="width:74%;background:var(--blue)"></div></div>
+          <div class="prog-val">74%</div>
+        </div>
+        <div class="prog-row">
+          <div class="prog-label">Deal Value Tracked</div>
+          <div class="prog-bar"><div class="prog-fill" style="width:91%;background:var(--purple)"></div></div>
+          <div class="prog-val">91%</div>
+        </div>
+      </div>
+
+      <div class="info-block green-l">
+        <h4>Security & Responsibility</h4>
+        <ul>
+          <li>CRM data is <strong>confidential</strong> — treat it as proprietary business information</li>
+          <li>Do <strong>not export</strong> data without explicit permission from your manager</li>
+          <li>Do <strong>not delete</strong> records randomly — contact CRM Admin for deletions</li>
+          <li>If unsure: Contact CRM Admin → Tech Team → Sales Head</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ── LEAD GUIDE ── -->
+    <div class="section" id="sec-leadguide">
+      <div class="divider"></div>
+      <div class="sec-title">Lead Management Guide</div>
+      <div class="sec-sub">Step-by-step instructions for creating leads, best practices for data entry, and common mistakes to avoid.</div>
+
+      <div class="sec-title" style="font-size:20px;margin-bottom:16px">How to Add a Lead</div>
+      <div class="steps-visual" style="margin-bottom:32px">
+        <div class="step-block"><div class="step-box"><div class="sn">1</div><p>Go to Leads Module in the top nav</p></div></div>
+        <div class="step-arrow">→</div>
+        <div class="step-block"><div class="step-box"><div class="sn">2</div><p>Click "Create Lead" button</p></div></div>
+        <div class="step-arrow">→</div>
+        <div class="step-block"><div class="step-box"><div class="sn">3</div><p>Fill in all required fields (see below)</p></div></div>
+        <div class="step-arrow">→</div>
+        <div class="step-block"><div class="step-box"><div class="sn">4</div><p>Save the lead record</p></div></div>
+      </div>
+
+      <div class="info-block blue-l" style="margin-bottom:28px">
+        <h4>Required Fields When Creating a Lead</h4>
+        <ul>
+          <li><strong>Name</strong> — Full name of the contact person</li>
+          <li><strong>Phone</strong> — With country code (e.g., +91 for India)</li>
+          <li><strong>Email</strong> — Valid business email address</li>
+          <li><strong>Lead Source</strong> — Where did this lead come from?</li>
+          <li><strong>Interested Business Vertical</strong> — Mondee, Miraee, Aarna, or Pranik</li>
+        </ul>
+      </div>
+
+      <div class="sec-title" style="font-size:20px;margin-bottom:16px">Data Entry Rules</div>
+      <div class="accordion" id="data-rules">
+        <div class="acc-item">
+          <div class="acc-header" onclick="toggleAcc(this)">
+            <h4>No Duplicate Leads</h4><span class="acc-icon">+</span>
+          </div>
+          <div class="acc-body">Before creating a new lead, always search the CRM for the contact's name, email, or company. Duplicates pollute reporting and create confusion over ownership. If a duplicate is found, update the existing record instead.</div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header" onclick="toggleAcc(this)">
+            <h4>Phone Number Format</h4><span class="acc-icon">+</span>
+          </div>
+          <div class="acc-body">Always add the country code prefix to every phone number. Format: +[Country Code] [Number]. Example: +91 98765 43210 for India. This ensures calls can be made directly from the CRM and is critical for international teams.</div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header" onclick="toggleAcc(this)">
+            <h4>Proper Naming Format</h4><span class="acc-icon">+</span>
+          </div>
+          <div class="acc-body">Use Title Case for contact names (e.g., "Anand Gupta" not "anand gupta" or "ANAND GUPTA"). For company names, use the official registered name. Consistent formatting makes search and reporting more reliable.</div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header" onclick="toggleAcc(this)">
+            <h4>No Fake or Placeholder Data</h4><span class="acc-icon">+</span>
+          </div>
+          <div class="acc-body">Never enter test data, fake numbers, or placeholder emails (like test@test.com) in the live CRM. Use the sandbox environment for testing. Every record in the CRM should represent a real business contact or opportunity.</div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header" onclick="toggleAcc(this)">
+            <h4>Always Update Notes</h4><span class="acc-icon">+</span>
+          </div>
+          <div class="acc-body">After every interaction — call, email, or meeting — add a note to the relevant Lead or Deal record. Notes should be concise but informative: what was discussed, key takeaways, and agreed next steps. This is critical for team handovers.</div>
+        </div>
+      </div>
+
+      <div class="sec-title" style="font-size:20px;margin-bottom:16px">Common Mistakes to Avoid</div>
+      <div class="mistakes-grid">
+        <div class="mistake-card"><div class="mistake-x">✕</div><div><strong>Forgetting to Update Lead Status</strong><p>Every interaction should result in a status update. "New" leads sitting for days signal inaction.</p></div></div>
+        <div class="mistake-card"><div class="mistake-x">✕</div><div><strong>Not Logging Calls</strong><p>If a call isn't logged in CRM, it effectively didn't happen from a reporting perspective.</p></div></div>
+        <div class="mistake-card"><div class="mistake-x">✕</div><div><strong>Creating Duplicate Contacts</strong><p>Always search before creating. Duplicates distort your pipeline view and waste team effort.</p></div></div>
+        <div class="mistake-card"><div class="mistake-x">✕</div><div><strong>Not Assigning Leads</strong><p>Every lead must have an owner. Unassigned leads fall through the cracks and are never followed up.</p></div></div>
+      </div>
+    </div>
+
+    <!-- ── BEST PRACTICES ── -->
+    <div class="section" id="sec-rules">
+      <div class="divider"></div>
+      <div class="sec-title">Best Practices</div>
+      <div class="sec-sub">Follow these guidelines consistently to ensure data quality, operational efficiency, and team alignment across the CRM.</div>
+
+      <div class="rules-list">
+        <div class="rule-item"><div class="rule-num">01</div><div class="rule-content"><h4>Never Leave Fields Empty</h4><p>Every field in the lead and deal form has a purpose. Missing fields create blind spots in your reports and make handovers harder for your team. If you genuinely don't know a value, use "Unknown" as a placeholder rather than leaving it blank.</p></div></div>
+        <div class="rule-item"><div class="rule-num">02</div><div class="rule-content"><h4>Always Mention Lead Source</h4><p>The lead source field helps leadership understand which channels are generating the most valuable business. Options include: Referral, Cold Outreach, LinkedIn, Event, Website, Partner, etc. This is required on every new lead.</p></div></div>
+        <div class="rule-item"><div class="rule-num">03</div><div class="rule-content"><h4>Add Notes After Every Call</h4><p>Notes should be written within 15 minutes of a call while the conversation is fresh. Include: what was discussed, prospect's key concerns, what was agreed, and what the next action is. Good notes make team handovers seamless.</p></div></div>
+        <div class="rule-item"><div class="rule-num">04</div><div class="rule-content"><h4>Update Status Regularly</h4><p>Lead and deal statuses should reflect the current reality at all times. Don't batch-update at end of week — update the moment a stage change occurs. Real-time status is what makes the pipeline trustworthy for leadership.</p></div></div>
+        <div class="rule-item"><div class="rule-num">05</div><div class="rule-content"><h4>Select the Correct Business Vertical</h4><p>With multiple business lines (Mondee, Miraee, Aarna, Pranik), correct vertical tagging is essential. A misclassified lead gets assigned to the wrong team, causing delays and lost opportunities. Double-check before saving.</p></div></div>
+        <div class="rule-item"><div class="rule-num">06</div><div class="rule-content"><h4>Respond to Automated Reminders</h4><p>The CRM sends automated follow-up reminders. These exist for a reason — treat them as hard deadlines. Consistently ignoring reminders leads to stale leads and CRM workflows breaking down. Acknowledge and act on every reminder.</p></div></div>
+      </div>
+
+      <div class="golden-rules">
+        <h3>⭐ The 5 Golden Rules</h3>
+        <div class="golden-item"><span class="golden-star">🏆</span><p>If it's not in CRM — it didn't happen.</p></div>
+        <div class="golden-item"><span class="golden-star">⚡</span><p>Update immediately — never defer your CRM entries.</p></div>
+        <div class="golden-item"><span class="golden-star">🎯</span><p>Be accurate — data quality is everyone's responsibility.</p></div>
+        <div class="golden-item"><span class="golden-star">🔁</span><p>Be consistent — same format, same standards, every time.</p></div>
+        <div class="golden-item"><span class="golden-star">🔒</span><p>CRM data is confidential — never export without authorization.</p></div>
+      </div>
+    </div>
+
+    <!-- ── FUNNEL ── -->
+    <div class="section" id="sec-funnel">
+      <div class="divider"></div>
+      <div class="sec-title">GTM Onboarding Funnel</div>
+      <div class="sec-sub">The "Down-to-Top Funnel" — a lean, high-value approach driven by business owners. Click any stage to explore its details, actions, and automation triggers.</div>
+
+      <div class="funnel-wrap">
+        <div>
+          <div class="funnel-visual">
+            <div class="funnel-stage stage-s1 selected" id="fs1" onclick="selectStage(1)">
+              <div class="fs-inner">
+                <div class="fs-label">
+                  <div class="fs-num">1</div>
+                  <div><div class="fs-name">Lead Identified & Assigned</div><div class="fs-sub">Business owner flags high-value target</div></div>
+                </div>
+                <div class="fs-arrow">›</div>
+              </div>
+            </div>
+            <div class="funnel-connector"></div>
+            <div class="funnel-stage stage-s2" id="fs2" onclick="selectStage(2)">
+              <div class="fs-inner">
+                <div class="fs-label">
+                  <div class="fs-num">2</div>
+                  <div><div class="fs-name">Initial Contact & Needs Discovery</div><div class="fs-sub">Global team reaches out & qualifies</div></div>
+                </div>
+                <div class="fs-arrow">›</div>
+              </div>
+            </div>
+            <div class="funnel-connector"></div>
+            <div class="funnel-stage stage-s3" id="fs3" onclick="selectStage(3)">
+              <div class="fs-inner">
+                <div class="fs-label">
+                  <div class="fs-num">3</div>
+                  <div><div class="fs-name">Pitch Deck Sent</div><div class="fs-sub">Tailored deck delivered to prospect</div></div>
+                </div>
+                <div class="fs-arrow">›</div>
+              </div>
+            </div>
+            <div class="funnel-connector"></div>
+            <div class="funnel-stage stage-s4" id="fs4" onclick="selectStage(4)">
+              <div class="fs-inner">
+                <div class="fs-label">
+                  <div class="fs-num">4</div>
+                  <div><div class="fs-name">Formal Engagement (NDA & Scoping)</div><div class="fs-sub">Legal protection & requirements gathered</div></div>
+                </div>
+                <div class="fs-arrow">›</div>
+              </div>
+            </div>
+            <div class="funnel-connector"></div>
+            <div class="funnel-stage stage-s5" id="fs5" onclick="selectStage(5)">
+              <div class="fs-inner">
+                <div class="fs-label">
+                  <div class="fs-num">5</div>
+                  <div><div class="fs-name">Proposal & Closure</div><div class="fs-sub">SOW, commercial negotiation, and sign-off</div></div>
+                </div>
+                <div class="fs-arrow">›</div>
+              </div>
+            </div>
+            <div class="funnel-connector"></div>
+            <div class="funnel-stage stage-fin" id="fs6" onclick="selectStage(6)">
+              <div class="fs-inner">
+                <div class="fs-label">
+                  <div class="fs-num">✓</div>
+                  <div><div class="fs-name">Closed Won / Closed Lost</div><div class="fs-sub">Deal finalized — celebration or analysis</div></div>
+                </div>
+                <div class="fs-arrow">›</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stage-detail" id="stage-detail-panel">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCENARIO ── -->
+    <div class="section" id="sec-scenario">
+      <div class="divider"></div>
+      <div class="sec-title">Scenario Walkthrough: Marico</div>
+      <div class="sec-sub">A real-world example showing how an opportunity moves through every stage of the GTM pipeline. Click each stage to expand the full detail.</div>
+
+      <div class="scenario-header">
+        <h3>🎬 The Deal: Marico D2C Analytics Overhaul</h3>
+        <p style="font-size:14px;color:var(--text-dim);line-height:1.6">This scenario demonstrates the complete GTM journey from lead identification to deal closure, with both manual actions and automated CRM triggers illustrated at each stage.</p>
+        <div class="scenario-meta">
+          <div class="s-meta-item"><div class="s-label">Business Unit</div><div class="s-value">Quippo</div></div>
+          <div class="s-meta-item"><div class="s-label">Business Owner</div><div class="s-value">Shiva</div></div>
+          <div class="s-meta-item"><div class="s-label">Global Team Member</div><div class="s-value">Pradeep Udhas</div></div>
+          <div class="s-meta-item"><div class="s-label">Prospect</div><div class="s-value">Marico</div></div>
+          <div class="s-meta-item"><div class="s-label">Prospect Contact</div><div class="s-value">Mr. Anand Gupta, Head of Digital Transformation</div></div>
+          <div class="s-meta-item"><div class="s-label">Opportunity</div><div class="s-value">D2C Supply Chain Analytics Revamp</div></div>
+          <div class="s-meta-item"><div class="s-label">Deal Value</div><div class="s-value" style="color:var(--orange);font-weight:700">$150,000</div></div>
+          <div class="s-meta-item"><div class="s-label">Outcome</div><div class="s-value" style="color:var(--green);font-weight:700">✓ Closed Won</div></div>
+        </div>
+      </div>
+
+      <div class="timeline">
+
+        <div class="tl-item" onclick="toggleTl(this)">
+          <div class="tl-dot" style="background:var(--blue)">1</div>
+          <div class="tl-body">
+            <div class="tl-header">
+              <span class="tl-stage-badge" style="background:rgba(59,130,246,.12);color:var(--blue)">Stage 1</span>
+              <h4>Lead Identified & Assigned</h4>
+              <span class="tl-chevron">▼</span>
+            </div>
+            <div class="tl-content">
+              <p style="font-size:13.5px;color:var(--text-dim);line-height:1.6;margin-bottom:16px">Shiva identifies Marico as a high-potential target and knows Pradeep has connections there. He asks his team to formally log it in the CRM.</p>
+              <div class="tl-cols">
+                <div>
+                  <div class="tl-col-label manual">Manual Actions</div>
+                  <div class="actor-chip">👤 Shiva's Team Member</div>
+                  <div class="action-item">Creates a new "Deal" in the "GTM Onboarding" pipeline in Zoho CRM</div>
+                  <div class="action-item">Deal Name: <strong>"Marico - D2C Analytics Overhaul"</strong></div>
+                  <div class="action-item">Account Name: Marico</div>
+                  <div class="action-item">Sets Deal Owner to <strong>Pradeep Udhas</strong></div>
+                  <div class="action-item">Adds <strong>Shiva</strong> as a Participant for visibility</div>
+                </div>
+                <div>
+                  <div class="tl-col-label auto">Automated CRM Triggers</div>
+                  <div class="auto-item"><strong>⚡ IMMEDIATELY — Email Notification</strong>Automated email sent to Pradeep Udhas (CC to Shiva): "New Strategic Deal Assigned: Marico - D2C Analytics Overhaul. Please initiate first contact."</div>
+                  <div class="auto-item"><strong>⚡ IMMEDIATELY — Task Created</strong>New task appears in Pradeep's Zoho account: "Initiate contact with Marico - D2C Analytics Overhaul". Due Date: 7 days from today.</div>
+                </div>
+              </div>
+              <div class="result-box"><strong>✓ Result:</strong> The opportunity is now officially in the pipeline. Pradeep is notified and tasked with making the first move.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-item" onclick="toggleTl(this)">
+          <div class="tl-dot" style="background:var(--green)">2</div>
+          <div class="tl-body">
+            <div class="tl-header">
+              <span class="tl-stage-badge" style="background:rgba(34,197,94,.12);color:var(--green)">Stage 2</span>
+              <h4>Initial Contact & Needs Discovery</h4>
+              <span class="tl-chevron">▼</span>
+            </div>
+            <div class="tl-content">
+              <p style="font-size:13.5px;color:var(--text-dim);line-height:1.6;margin-bottom:16px">Pradeep leverages his network and secures a call with Mr. Anand Gupta at Marico. The call is positive; Marico's needs become clearer and early qualification is confirmed.</p>
+              <div class="tl-cols">
+                <div>
+                  <div class="tl-col-label manual">Manual Actions</div>
+                  <div class="actor-chip">👤 Pradeep Udhas</div>
+                  <div class="action-item">Calls Mr. Anand Gupta at Marico</div>
+                  <div class="action-item">Adds a Note in Zoho: "Spoke with Anand Gupta. Confirmed strong interest in improving D2C supply chain visibility. Struggling with inventory forecasting. Scheduled follow-up."</div>
+                  <div class="action-item">Emails Shiva a quick summary with key qualification insights</div>
+                  <div class="action-item">Moves the Deal stage to "Initial Contact & Needs Discovery"</div>
+                </div>
+                <div>
+                  <div class="tl-col-label auto">Automated CRM Triggers</div>
+                  <div class="auto-item"><strong>⏰ If 7 days pass with no activity...</strong>The system monitors activity. If no new calls, emails, or notes are logged by Pradeep within 7 days, an automated reminder email is sent to him — CC'd to Shiva.</div>
+                </div>
+              </div>
+              <div class="result-box"><strong>✓ Result:</strong> Lead is now qualified. Marico has a confirmed need, early alignment is established, and the team has clarity from discovery to shape the value direction.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-item" onclick="toggleTl(this)">
+          <div class="tl-dot" style="background:var(--orange)">3</div>
+          <div class="tl-body">
+            <div class="tl-header">
+              <span class="tl-stage-badge" style="background:var(--orange-dim);color:var(--orange)">Stage 3</span>
+              <h4>Pitch Deck Sent</h4>
+              <span class="tl-chevron">▼</span>
+            </div>
+            <div class="tl-content">
+              <p style="font-size:13.5px;color:var(--text-dim);line-height:1.6;margin-bottom:16px">Based on Pradeep's discovery notes and internal value mapping on how the solution fits Marico's needs, Shiva's team prepares a targeted pitch deck focusing on supply chain analytics.</p>
+              <div class="tl-cols">
+                <div>
+                  <div class="tl-col-label manual">Manual Actions</div>
+                  <div class="actor-chip">👤 Pradeep Udhas</div>
+                  <div class="action-item">Receives the customized deck from Shiva's team</div>
+                  <div class="action-item">Opens the Zoho Deal and clicks "Send Email"</div>
+                  <div class="action-item">Attaches the deck and writes a personalized email to Mr. Gupta — CC'ing Shiva</div>
+                  <div class="action-item">After sending, updates the Deal stage to "Pitch Deck Sent"</div>
+                </div>
+                <div>
+                  <div class="tl-col-label auto">Automated CRM Triggers</div>
+                  <div class="auto-item"><strong>📧 Email Auto-Logged</strong>The email sent from Zoho is automatically logged in the Deal's activity timeline — visible to all stakeholders.</div>
+                  <div class="auto-item"><strong>📋 Task Created — 3 Days Later</strong>A task is automatically created for Pradeep: "Follow up on pitch deck with Marico". Due Date: 3 days from stage update.</div>
+                </div>
+              </div>
+              <div class="result-box"><strong>✓ Result:</strong> Marico has the tailored information demonstrating solution fit. A systematic follow-up is now scheduled to maintain momentum.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-item" onclick="toggleTl(this)">
+          <div class="tl-dot" style="background:var(--purple)">4</div>
+          <div class="tl-body">
+            <div class="tl-header">
+              <span class="tl-stage-badge" style="background:rgba(168,85,247,.12);color:var(--purple)">Stage 4</span>
+              <h4>Formal Engagement (NDA & Scoping)</h4>
+              <span class="tl-chevron">▼</span>
+            </div>
+            <div class="tl-content">
+              <p style="font-size:13.5px;color:var(--text-dim);line-height:1.6;margin-bottom:16px">Mr. Gupta is impressed and replies to both Pradeep and Shiva. He wants to proceed and asks for an NDA to share confidential data for a proper scope.</p>
+              <div class="tl-cols">
+                <div>
+                  <div class="tl-col-label manual">Manual Actions</div>
+                  <div class="actor-chip">👤 Pradeep Udhas</div>
+                  <div class="action-item">Sends the company's standard NDA to Mr. Gupta</div>
+                  <div class="action-item">Once Marico returns the signed NDA, uploads the PDF to "Attachments" in the Zoho Deal</div>
+                  <div class="action-item">Requests the formal scoping document from Marico</div>
+                  <div class="action-item">Uploads the received scoping document to "Attachments"</div>
+                  <div class="action-item">Moves the Deal stage to "Formal Engagement (NDA & Scoping)"</div>
+                </div>
+                <div>
+                  <div class="tl-col-label auto">Automated CRM Triggers</div>
+                  <div class="auto-item"><strong>📣 Progress Alert Email</strong>An automated internal email is sent to Shiva and the Sales Team Lead: "Progress Update: 'Marico - D2C Analytics Overhaul' has entered Formal Engagement."</div>
+                </div>
+              </div>
+              <div class="result-box"><strong>✓ Result:</strong> The deal is now serious. The team is legally protected to discuss sensitive information and has the technical details for deeper value mapping.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-item" onclick="toggleTl(this)">
+          <div class="tl-dot" style="background:var(--red)">5</div>
+          <div class="tl-body">
+            <div class="tl-header">
+              <span class="tl-stage-badge" style="background:rgba(239,68,68,.12);color:var(--red)">Stage 5</span>
+              <h4>Proposal & Closure</h4>
+              <span class="tl-chevron">▼</span>
+            </div>
+            <div class="tl-content">
+              <p style="font-size:13.5px;color:var(--text-dim);line-height:1.6;margin-bottom:16px">Shiva and the core sales/technical team take the lead. They analyze the scoping document, create an SOW, and prepare the commercial proposal. Commercial discussions and negotiations follow.</p>
+              <div class="tl-cols">
+                <div>
+                  <div class="tl-col-label manual">Manual Actions</div>
+                  <div class="actor-chip">👤 Shiva & Sales Team</div>
+                  <div class="action-item">Prepares the proposal, solution approach, and pricing</div>
+                  <div class="action-item">Updates the "Amount" field in the Zoho Deal to <strong>$150,000</strong> and sets the Expected Closing Date</div>
+                  <div class="action-item">Sends the formal proposal to Mr. Gupta</div>
+                  <div class="action-item">Conducts commercial discussions and negotiations — all logged in Deal notes</div>
+                </div>
+                <div>
+                  <div class="tl-col-label auto">Automated CRM Triggers (Blueprint)</div>
+                  <div class="auto-item"><strong>🔒 Blueprint Enforcement — Closed Won</strong>Shiva CANNOT change the stage to "Closed Won" without first uploading the final signed contract as an attachment.</div>
+                  <div class="auto-item"><strong>🔒 Blueprint Enforcement — Closed Lost</strong>If moving to "Closed Lost", Zoho forces Shiva to select a "Reason for Loss" from a predefined dropdown before saving.</div>
+                </div>
+              </div>
+              <div class="result-box"><strong>✓ Result:</strong> Proposal shared, value alignment established. Deal enters final commercial negotiation phase.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-item" onclick="toggleTl(this)">
+          <div class="tl-dot" style="background:var(--green)">✓</div>
+          <div class="tl-body">
+            <div class="tl-header">
+              <span class="tl-stage-badge" style="background:rgba(34,197,94,.12);color:var(--green)">Final Stage</span>
+              <h4>🎉 Closed Won — $150,000</h4>
+              <span class="tl-chevron">▼</span>
+            </div>
+            <div class="tl-content">
+              <p style="font-size:13.5px;color:var(--text-dim);line-height:1.6;margin-bottom:16px">After final commercial discussions and negotiations, Marico signs the contract. The deal is officially closed and won.</p>
+              <div class="tl-cols">
+                <div>
+                  <div class="tl-col-label manual">Manual Actions</div>
+                  <div class="actor-chip">👤 Shiva</div>
+                  <div class="action-item">Uploads the final, signed contract to the "Attachments" section in the Deal</div>
+                  <div class="action-item">Changes the Deal stage to <strong>"Closed Won"</strong></div>
+                </div>
+                <div>
+                  <div class="tl-col-label auto">Automated CRM Triggers</div>
+                  <div class="auto-item"><strong>🎊 IMMEDIATELY — Celebration Email</strong>Triggered and sent to ALL stakeholders (Shiva, Pradeep, Finance, Head of Delivery): "We Won! Deal Closed: 'Marico - D2C Analytics Overhaul' for $150,000. Please initiate project kickoff."</div>
+                </div>
+              </div>
+              <div class="result-box" style="background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3)"><strong style="font-size:15px">🏆 Deal Won!</strong><br>Revenue recognized in forecast. Operational teams notified to begin project delivery. Pradeep relationship maintained for future opportunities.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── RESPONSIBILITY ── -->
+    <div class="section" id="sec-responsibility">
+      <div class="divider"></div>
+      <div class="sec-title">Roles & Responsibilities</div>
+      <div class="sec-sub">Clear ownership is what makes the GTM process work. Here's who does what at each phase of the pipeline.</div>
+
+      <div class="resp-grid">
+        <div class="resp-card">
+          <div class="who"><div class="avatar" style="background:var(--orange-dim);color:var(--orange)">BO</div>Business Owners</div>
+          <p style="font-size:12px;color:var(--text-faint);margin-bottom:12px">e.g., Shiva, Praveen</p>
+          <ul class="check-list">
+            <li>Identify and list high-value targets</li>
+            <li>Enter leads into the CRM system</li>
+            <li>Create customized pitch decks</li>
+            <li>Support internal value mapping</li>
+            <li>Drive the opportunity to closure</li>
+            <li>Prepare formal proposals & SOW</li>
+            <li>Lead commercial discussions</li>
+            <li>Keep CRM updated through closure</li>
+          </ul>
+        </div>
+        <div class="resp-card">
+          <div class="who"><div class="avatar" style="background:rgba(59,130,246,.15);color:var(--blue)">GT</div>Global Team</div>
+          <p style="font-size:12px;color:var(--text-faint);margin-bottom:12px">e.g., Pradeep, Shyam, Karthik, Miten</p>
+          <ul class="check-list">
+            <li>Make initial outreach contact</li>
+            <li>Qualify the lead opportunity</li>
+            <li>Conduct discovery discussions</li>
+            <li>Gather prospect requirements</li>
+            <li>Send pitch decks via Zoho email</li>
+            <li>Manage NDA signing process</li>
+            <li>Collect scoping documents</li>
+            <li>Maintain the prospect relationship</li>
+          </ul>
+        </div>
+        <div class="resp-card">
+          <div class="who"><div class="avatar" style="background:rgba(34,197,94,.15);color:var(--green)">CA</div>CRM Admin</div>
+          <p style="font-size:12px;color:var(--text-faint);margin-bottom:12px">Technical CRM owner</p>
+          <ul class="check-list">
+            <li>Set up initial CRM pipeline structure</li>
+            <li>Configure automated workflow rules</li>
+            <li>Manage user access & permissions</li>
+            <li>Resolve technical CRM issues</li>
+            <li>Handle data deletion requests</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="sec-title" style="font-size:22px;margin-bottom:16px;margin-top:8px">Automated Triggers Summary</div>
+
+      <div class="accordion">
+        <div class="acc-item">
+          <div class="acc-header" onclick="toggleAcc(this)">
+            <h4>⚡ Workflow Rule 1 — New Strategic Deal Assigned</h4><span class="acc-icon">+</span>
+          </div>
+          <div class="acc-body">
+            <strong>Trigger:</strong> On Deal Creation<br><br>
+            <strong>Action 1 (Email):</strong> Send automated email to Deal Owner and CC Business Owner.<br>
+            Subject: "New Strategic Deal Assigned: [Deal Name]"<br>
+            Body: "A new deal for '[Account Name]' has been assigned to you by '[Deal Created By]'. Please initiate first contact."<br><br>
+            <strong>Action 2 (Task):</strong> Create a task for the Deal Owner.<br>
+            Subject: "Initiate contact with [Deal Name]" — Due: 7 days from creation.
+          </div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header" onclick="toggleAcc(this)">
+            <h4>⏰ Workflow Rule 2 — First Contact Follow-up Reminder</h4><span class="acc-icon">+</span>
+          </div>
+          <div class="acc-body">
+            <strong>Trigger:</strong> When deal is in Stage 2 AND last activity time is more than 7 days ago.<br><br>
+            <strong>Action (Email):</strong> Reminder email to Deal Owner (CC Business Owner).<br>
+            Subject: "Reminder: Follow-up required for [Deal Name]"
+          </div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header" onclick="toggleAcc(this)">
+            <h4>📋 Workflow Rule 3 — Pitch Deck Follow-up Task</h4><span class="acc-icon">+</span>
+          </div>
+          <div class="acc-body">
+            <strong>Trigger:</strong> 3 days after Stage is updated to "Pitch Deck Sent"<br><br>
+            <strong>Action (Task):</strong> Create a task for the Deal Owner.<br>
+            Subject: "Follow up on pitch deck with [Deal Name]"
+          </div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header" onclick="toggleAcc(this)">
+            <h4>📣 Workflow Rule 4 — Deal Progress Notification</h4><span class="acc-icon">+</span>
+          </div>
+          <div class="acc-body">
+            <strong>Trigger:</strong> On Stage Update to "Formal Engagement"<br><br>
+            <strong>Action (Email):</strong> Internal alert to Business Owner and Sales Team Lead.<br>
+            Subject: "Progress Update: [Deal Name] is now in Formal Engagement"
+          </div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header" onclick="toggleAcc(this)">
+            <h4>🎊 Workflow Rule 5 — Deal Won Celebration & Handover</h4><span class="acc-icon">+</span>
+          </div>
+          <div class="acc-body">
+            <strong>Trigger:</strong> On Stage Update to "Closed Won"<br><br>
+            <strong>Action (Email):</strong> Notification to all relevant stakeholders, Finance Team, and Delivery/Operations Head.<br>
+            Subject: "We Won! Deal Closed: [Deal Name]"
+          </div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-header" onclick="toggleAcc(this)">
+            <h4>📊 Workflow Rule 6 — Deal Lost Analysis</h4><span class="acc-icon">+</span>
+          </div>
+          <div class="acc-body">
+            <strong>Trigger:</strong> On Stage Update to "Closed Lost"<br><br>
+            <strong>Action (Task):</strong> Create a task for Business Owner and Sales Head.<br>
+            Subject: "Analyze reason for losing deal: [Deal Name]"<br><br>
+            <strong>Blueprint Enforcement:</strong> Before marking Closed Lost, Zoho mandates selection of "Reason for Loss" from a predefined picklist. Before marking Closed Won, the final signed contract must be uploaded as an attachment.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// ── STAGE DATA ──
+const stageData = {
+  1: {
+    title: 'Lead Identified & Assigned',
+    owner: 'CRM Admin / Business Owner\'s Team',
+    color: 'var(--blue)',
+    desc: 'A potential high-value client has been identified by a Business Owner or referred by the Global Team. The lead is now being formally entered into the system.',
+    actions: [
+      'Create a new "Deal" in the "GTM Onboarding" pipeline',
+      'Fill in the company name (Account Name) and all known details',
+      'Assign the appropriate Global Team Member as the "Deal Owner"',
+      'Add the Business Owner as a "Participant" for visibility'
+    ],
+    triggers: [
+      { title: 'Workflow Rule 1: "New Strategic Deal Assigned"', body: 'Trigger: On Deal Creation.\nEmail to Deal Owner: "A new deal for [Account Name] has been assigned to you. Please initiate first contact."\nTask for Deal Owner: "Initiate contact with [Deal Name]" — Due: 7 days from creation.' }
+    ],
+    exit: 'The deal has been created and the Global Team Member is ready to make contact.'
+  },
+  2: {
+    title: 'Initial Contact & Needs Discovery',
+    owner: 'Global Team Member (Deal Owner)',
+    color: 'var(--green)',
+    desc: 'The assigned Global Team Member actively reaches out to the prospect to open a dialogue, qualify the opportunity, confirm interest, understand business needs, and conduct the initial discovery discussion.',
+    actions: [
+      'Contact the prospect via call, email, or LinkedIn',
+      'Conduct an initial discovery conversation to identify needs and challenges',
+      'Log all activities, call notes, and meeting summaries in the Deal record',
+      'Communicate findings and requirements back to the Business Owner'
+    ],
+    triggers: [
+      { title: 'Workflow Rule 2: "First Contact Follow-up Reminder"', body: 'Trigger: Deal in this stage AND Last Activity Time > 7 days.\nAction: Send reminder email to Deal Owner, CC Business Owner.' }
+    ],
+    exit: 'Initial contact successful, qualification completed, prospect shows interest, and high-level requirements have been gathered.'
+  },
+  3: {
+    title: 'Pitch Deck Sent',
+    owner: 'Global Team Member (Deal Owner)',
+    color: 'var(--orange)',
+    desc: 'A customized pitch deck has been prepared by the Business Owner based on the identified needs and value mapping, and sent to the prospect by the Global Team Member.',
+    actions: [
+      'Business Owner provides the tailored pitch deck to the Global Team Member',
+      'Global Team Member sends pitch deck to prospect via email',
+      'Business Owner must be CC\'d on this email',
+      'Email sent using Zoho CRM integration to ensure it\'s logged in the deal timeline'
+    ],
+    triggers: [
+      { title: 'Workflow Rule 3: "Pitch Deck Follow-up"', body: 'Trigger: 3 days after Stage is updated to "Pitch Deck Sent".\nAction: Create a task for Deal Owner — "Follow up on pitch deck with [Deal Name]".' }
+    ],
+    exit: 'The prospect has acknowledged receipt of the pitch deck and agreed to explore further engagement.'
+  },
+  4: {
+    title: 'Formal Engagement (NDA & Scoping)',
+    owner: 'Global Team Member & Business Owner',
+    color: 'var(--purple)',
+    desc: 'The relationship is being formalized. The NDA is being processed, and deeper discussions begin around detailed project scope, requirements, and feasibility.',
+    actions: [
+      'Global Team Member sends the NDA to the prospect and manages the signing process',
+      'Once NDA is signed, request the formal scoping document from prospect',
+      'Upload the signed NDA to the "Attachments" section of the Deal record',
+      'Upload the received scoping document to "Attachments"'
+    ],
+    triggers: [
+      { title: 'Workflow Rule 4: "Deal Progress Notification"', body: 'Trigger: On Stage Update to "Formal Engagement".\nAction: Send internal alert to Business Owner and Sales Team Lead.\nSubject: "Progress Update: [Deal Name] is now in Formal Engagement".' }
+    ],
+    exit: 'The NDA is signed by both parties, and the detailed scoping document has been received.'
+  },
+  5: {
+    title: 'Proposal & Closure',
+    owner: 'Business Owner & Sales Team',
+    color: 'var(--red)',
+    desc: 'The core team analyzes the scope, conducts detailed value mapping, prepares the commercial proposal, and enters commercial discussions and negotiations to close the deal.',
+    actions: [
+      'Business Owner and Sales Team conduct value mapping based on the scoping document',
+      'Create a formal proposal and Statement of Work (SOW)',
+      'Send the proposal to the prospect; begin commercial discussions',
+      'Keep "Amount" and "Closing Date" fields updated throughout this stage',
+      'Log all calls, emails, and negotiation notes in the Deal record'
+    ],
+    triggers: [
+      { title: 'Zoho Blueprint — Closed Won', body: 'MANDATORY: The final signed contract must be uploaded as an attachment BEFORE the stage can be moved to "Closed Won".' },
+      { title: 'Zoho Blueprint — Closed Lost', body: 'MANDATORY: The "Reason for Loss" field must be filled out from a predefined picklist BEFORE the stage can be moved to "Closed Lost".' }
+    ],
+    exit: 'The deal is either won (contract signed) or lost (negotiations ceased).'
+  },
+  6: {
+    title: 'Closed Won / Closed Lost',
+    owner: 'Business Owner / Sales Team',
+    color: 'var(--green)',
+    desc: 'The final outcome of the deal. If won, revenue is recognized and the operations team begins project kickoff. If lost, analysis is conducted to understand the reason.',
+    actions: [
+      'For Closed Won: Upload final signed contract → Change stage to "Closed Won"',
+      'For Closed Lost: Select "Reason for Loss" → Change stage to "Closed Lost"',
+      'Ensure all deal notes and attachments are complete for the record',
+      'For Closed Won: Handover initiated with Finance and Delivery teams'
+    ],
+    triggers: [
+      { title: 'Workflow Rule 5: "Deal Won Celebration & Handover"', body: 'Trigger: Stage updated to "Closed Won".\nEmail to all stakeholders, Finance, Delivery/Operations Head.\nSubject: "We Won! Deal Closed: [Deal Name]".' },
+      { title: 'Workflow Rule 6: "Deal Lost Analysis"', body: 'Trigger: Stage updated to "Closed Lost".\nTask created for Business Owner and Sales Head.\nSubject: "Analyze reason for losing deal: [Deal Name]".' }
+    ],
+    exit: 'Final outcome recorded. Pipeline updated. Stakeholders notified.'
+  }
+};
+
+// ── NAVIGATION ──
+const sectionMap = {
+  home:'Home', intro:'Introduction', terms:'Key Terms', modules:'CRM Modules',
+  workflow:'Daily Workflow', leadguide:'Lead Guide', rules:'Best Practices',
+  funnel:'GTM Funnel', scenario:'Scenario: Marico', responsibility:'Responsibilities'
+};
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  document.getElementById('bread-label').textContent = sectionMap[id] || id;
+  // highlight nav link
+  document.querySelectorAll('.nav-link').forEach(l => {
+    if (l.getAttribute('onclick') && l.getAttribute('onclick').includes("'" + id + "'")) {
+      l.classList.add('active');
+    }
+  });
+  // init funnel if needed
+  if (id === 'funnel') { selectStage(1); }
+  closeSidebar();
+  window.scrollTo({top:0});
+}
+
+// ── TABS ──
+function showTab(group, id, btn) {
+  document.querySelectorAll('#' + group + '-' + id).forEach(p => {});
+  const panels = document.querySelectorAll('.tab-panel');
+  panels.forEach(p => {
+    if (p.id.startsWith(group + '-')) p.classList.remove('active');
+  });
+  document.getElementById(group + '-' + id).classList.add('active');
+  btn.closest('.tabs').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── ACCORDION ──
+function toggleAcc(header) {
+  const item = header.closest('.acc-item');
+  item.classList.toggle('open');
+}
+
+// ── TIMELINE ──
+function toggleTl(item) {
+  item.classList.toggle('open');
+}
+
+// ── FUNNEL STAGE ──
+function selectStage(n) {
+  document.querySelectorAll('.funnel-stage').forEach(s => s.classList.remove('selected'));
+  document.getElementById('fs' + n).classList.add('selected');
+  renderStageDetail(n);
+}
+
+function renderStageDetail(n) {
+  const d = stageData[n];
+  const panel = document.getElementById('stage-detail-panel');
+  const actionsHtml = d.actions.map(a => `<div class="action-item">${a}</div>`).join('');
+  const triggersHtml = d.triggers.map(t => `<div class="trigger-item"><strong>${t.title}</strong>${t.body.replace(/\n/g,'<br>')}</div>`).join('');
+  panel.innerHTML = `
+    <h3 style="color:${d.color};margin-bottom:8px">Stage ${n === 6 ? '6' : n}</h3>
+    <h3 style="margin-bottom:10px">${d.title}</h3>
+    <div class="owner-badge">👤 ${d.owner}</div>
+    <p>${d.desc}</p>
+    <div class="detail-section">
+      <h5>Actions to Take</h5>
+      ${actionsHtml}
+    </div>
+    <div class="detail-section" style="margin-top:16px">
+      <h5>Zoho CRM Automations</h5>
+      ${triggersHtml}
+    </div>
+    <div class="exit-box"><strong>✓ Exit Criteria:</strong> ${d.exit}</div>
+  `;
+}
+
+// ── MOBILE SIDEBAR ──
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', () => {
+  selectStage(1);
+  // Animate progress bars
+  setTimeout(() => {
+    document.querySelectorAll('.prog-fill').forEach(bar => {
+      const w = bar.style.width;
+      bar.style.width = '0';
+      setTimeout(() => { bar.style.width = w; }, 100);
+    });
+  }, 100);
+});
+</script>
+</body>
+</html>
